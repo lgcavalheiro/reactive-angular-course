@@ -1,9 +1,7 @@
-import {Component, OnInit} from '@angular/core';
-import {Course, sortCoursesBySeqNo} from '../model/course';
-import {interval, noop, Observable, of, throwError, timer} from 'rxjs';
-import {catchError, delay, delayWhen, filter, finalize, map, retryWhen, shareReplay, tap} from 'rxjs/operators';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {CourseDialogComponent} from '../course-dialog/course-dialog.component';
+import { Component, OnInit } from '@angular/core';
+import { Course, sortCoursesBySeqNo } from '../model/course';
+import { interval, noop, Observable, of, throwError, timer } from 'rxjs';
+import { catchError, delay, delayWhen, filter, finalize, map, retryWhen, shareReplay, tap } from 'rxjs/operators';
 import { CoursesService } from '../services/courses.service';
 
 
@@ -14,45 +12,31 @@ import { CoursesService } from '../services/courses.service';
 })
 export class HomeComponent implements OnInit {
 
-  beginnerCourses: Course[];
+  beginnerCourses$: Observable<Course[]>;
 
-  advancedCourses: Course[];
+  advancedCourses$: Observable<Course[]>;
 
 
-  constructor(private coursesService: CoursesService, private dialog: MatDialog) {
+  constructor(private coursesService: CoursesService) {
 
   }
 
   ngOnInit() {
-    const courses$ = this.coursesService.loadAllCourses();
-
-
-    // this.http.get('/api/courses')
-    //   .subscribe(
-    //     res => {
-
-    //       const courses: Course[] = res["payload"].sort(sortCoursesBySeqNo);
-
-    //       this.beginnerCourses = courses.filter(course => course.category == "BEGINNER");
-
-    //       this.advancedCourses = courses.filter(course => course.category == "ADVANCED");
-
-    //     });
-
+    this.reloadCourses();
   }
 
-  editCourse(course: Course) {
+  reloadCourses() {
+    const courses$ = this.coursesService.loadAllCourses();
 
-    const dialogConfig = new MatDialogConfig();
+    this.beginnerCourses$ = courses$
+      .pipe(
+        map(courses => courses.filter(course => course.category === 'BEGINNER').sort(sortCoursesBySeqNo))
+      )
 
-    dialogConfig.disableClose = true;
-    dialogConfig.autoFocus = true;
-    dialogConfig.width = "400px";
-
-    dialogConfig.data = course;
-
-    const dialogRef = this.dialog.open(CourseDialogComponent, dialogConfig);
-
+    this.advancedCourses$ = courses$
+      .pipe(
+        map(courses => courses.filter(course => course.category === 'ADVANCED').sort(sortCoursesBySeqNo))
+      )
   }
 
 }
