@@ -1,6 +1,6 @@
 
 .messages-container {
-  display: flex;
+  display: grid;
   color: #a94442;
   background-color: #f2dede;
   border: 1px solid #ebccd1;
